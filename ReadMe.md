@@ -18,7 +18,7 @@ These are some handy adobe illustrator scripts I've written for my own use and h
 
 # ✨ Scripts
 
-## [AddMargin.jsx](/AddMargin.jsx)
+## [AddMargin.jsx](https://raw.githubusercontent.com/mulaRahul/illustrator-scripts/main/AddMargin.jsx)
 Add margins as guides or rectangles to all/desired artboards.
 
 ![preview](/previews/AddMargin.gif)
@@ -48,7 +48,7 @@ Add margins as guides or rectangles to all/desired artboards.
 
 ---
 
-## [AddPadding.jsx](/AddPadding.jsx)
+## [AddPadding.jsx](https://raw.githubusercontent.com/mulaRahul/illustrator-scripts/main/AddPadding.jsx)
 Add padding around your content in an artboard (by increasing the artboard size).
 
 ![preview](/previews/AddPadding.gif)
