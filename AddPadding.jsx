@@ -30,18 +30,34 @@
 // See the LICENSE file for details.
 
 
-// * UI *
+//@target illustrator
+app.preferences.setBooleanPreference("ShowExternalJSXWarning", false);
+
+// config data
+var configData = {
+    medic: 15,
+    spacing: 10,
+    fillAlignment: ["fill", "center"],
+    leftAlignment: ["left", "center"],
+};
+
+// * UI * //
 // root window
 var dlg = new Window("dialog", "Add Padding");
+dlg.alignChildren = ["fill", "fill"];
 
 // artboard options layout
-var artboardOptionsContainer = dlg.add("group", undefined);
-artboardOptionsContainer.alignment = ["left", "center"];
+var artboardOptionsContainer = dlg.add("panel", undefined, "Artboards");
+artboardOptionsContainer.orientation = "row";
+artboardOptionsContainer.paddings = configData.medic;
+artboardOptionsContainer.alignChildren = configData.fillAlignment;
 
-var allArtboardOption = artboardOptionsContainer.add("radiobutton", undefined, "All Artboards");
+var allArtboardOption = artboardOptionsContainer.add("radiobutton", undefined, "All");
 var customArtboardOption = artboardOptionsContainer.add("radiobutton", undefined, "Custom");
-var customArtboardInput = artboardOptionsContainer.add("edittext", undefined, "0, 2, 4-6");
+var customArtboardInput = artboardOptionsContainer.add("edittext", undefined, "1, 3, 5-8");
+customArtboardInput.minimumSize = [100, 0];
 
+// disable/enable [customArtboardInput] text-field
 allArtboardOption.onClick = function () {
     customArtboardInput.enabled = false;
 };
@@ -49,105 +65,155 @@ customArtboardOption.onClick = function () {
     customArtboardInput.enabled = true;
 };
 
-// method options layout
-var methodOptionsContainer = dlg.add("group", undefined);
-methodOptionsContainer.alignment = ["left", "center"];
+// padding input
+var paddingContainer = dlg.add("panel", undefined, "Padding");
+paddingContainer.paddings = configData.medic;
+paddingContainer.alignment = configData.fillAlignment;
+paddingContainer.alignChildren = configData.leftAlignment;
 
-methodOptionsContainer.add("statictext", undefined, "Method ");
-var similarOption = methodOptionsContainer.add("radiobutton", undefined, "Similar");
-var alternateOption = methodOptionsContainer.add("radiobutton", undefined, "Alternate");
-alternateOption.helpTip = "Alternate between odd and even artboard number";
+var paddingRadiobuttonGroup = paddingContainer.add("group", undefined);
+paddingRadiobuttonGroup.orientation = "column";
+paddingRadiobuttonGroup.alignChildren = configData.leftAlignment;
+
+var allPaddingWrapper = paddingRadiobuttonGroup.add("group", undefined);
+
+var allPaddingBtn = allPaddingWrapper.add("radiobutton", undefined, "All");
+var paddingAll = allPaddingWrapper.add("edittext", undefined);
+paddingAll.minimumSize = [60, 0];
+var unitOptions = allPaddingWrapper.add("dropdownlist", undefined, ["pixels", "inches"]);
+
+var directionalPadding = paddingRadiobuttonGroup.add("radiobutton", undefined, "Directional");
+
+// toggle radiobutton states
+allPaddingBtn.onClick = function() {
+    // radiobuttons
+    this.value = true;
+    directionalPadding.value = false;
+
+    // edittexts
+    topPadding.enabled = false;
+    leftPadding.enabled = false;
+    rightPadding.enabled = false;
+    bottomPadding.enabled = false;
+
+    paddingAll.enabled = true;
+
+}
+directionalPadding.onClick = function() {
+    // radiobuttons
+    this.value = true;
+    allPaddingBtn.value = false;
+
+    // edittexts
+    topPadding.enabled = true;
+    leftPadding.enabled = true;
+    rightPadding.enabled = true;
+    bottomPadding.enabled = true;
+
+    paddingAll.enabled = false;
+}
+
+// directional padding
+var directionalPaddingPanel = paddingContainer.add("group", undefined);
+directionalPaddingPanel.orientation = "row";
+directionalPaddingPanel.alignment = configData.leftAlignment;
+
+// var directionalPadding = dlg.add("checkbox", undefined, "Different paddings");
+// directionalPadding.alignment = configData.leftAlignment;;
+
+var topWrapper = directionalPaddingPanel.add("group", undefined);
+topWrapper.orientation = "column";
+topWrapper.alignChildren = configData.leftAlignment;;
+
+topWrapper.add("statictext", undefined, "Top ");
+var topPadding = topWrapper.add("edittext", undefined, "0");
+topPadding.minimumSize = [50, 0];
+
+var rightWrapper = directionalPaddingPanel.add("group", undefined);
+rightWrapper.orientation = "column";
+rightWrapper.alignChildren = configData.leftAlignment;;
+
+rightWrapper.add("statictext", undefined, "Right ");
+var rightPadding = rightWrapper.add("edittext", undefined, "0");
+rightPadding.minimumSize = [50, 0];
+
+var leftWrapper = directionalPaddingPanel.add("group", undefined);
+leftWrapper.orientation = "column";
+leftWrapper.alignChildren = configData.leftAlignment;;
+
+leftWrapper.add("statictext", undefined, "Left ");
+var leftPadding = leftWrapper.add("edittext", undefined, "0");
+leftPadding.minimumSize = [50, 0];
+
+var bottomWrapper = directionalPaddingPanel.add("group", undefined);
+bottomWrapper.orientation = "column";
+bottomWrapper.alignChildren = configData.leftAlignment;;
+
+bottomWrapper.add("statictext", undefined, "Bottom ");
+var bottomPadding = bottomWrapper.add("edittext", undefined, "0");
+bottomPadding.minimumSize = [50, 0];
+
+// method options layout
+var methodOptionsContainer = dlg.add("panel", undefined, "Method");
+methodOptionsContainer.paddings = configData.medic;
+methodOptionsContainer.alignChildren = configData.leftAlignment;
+
+var methodOptionsWrapper = methodOptionsContainer.add("group", undefined);
+methodOptionsWrapper.orientation = "row";
+
+var similarOption = methodOptionsWrapper.add("radiobutton", undefined, "Similar");
+similarOption.helpTip = "Same padding on all artboards";
+
+var alternateOption = methodOptionsWrapper.add("radiobutton", undefined, "Alternate");
+alternateOption.helpTip = "Alternate between odd and even numbered artboards";
 
 // alternate options input layout
-var alternateOptionsContainer = dlg.add("group", undefined);
-alternateOptionsContainer.orientation = "column";
-
-var alternateOddContainer = alternateOptionsContainer.add("panel", undefined, "Odd");
+var alternateOddContainer = methodOptionsContainer.add("panel", undefined, "Odd");
 alternateOddContainer.orientation = "row";
-alternateOddContainer.add("statictext", undefined, "Left");
-var oddLeftPadding = alternateOddContainer.add("edittext", undefined);
-oddLeftPadding.minimumSize = [32, 0];
-alternateOddContainer.add("statictext", undefined, "Right");
-var oddRightPadding = alternateOddContainer.add("edittext", undefined);
-oddRightPadding.minimumSize = [32, 0];
+alternateOddContainer.paddings = configData.medic;
+alternateOddContainer.alignment = configData.fillAlignment;
+alternateOddContainer.alignChildren = configData.fillAlignment;
 
-var alternateEvenContainer = alternateOptionsContainer.add("panel", undefined, "Even");
+var alternateOddLeftWrapper = alternateOddContainer.add("group", undefined);
+
+alternateOddLeftWrapper.add("statictext", undefined, "Left");
+var oddLeftPadding = alternateOddLeftWrapper.add("edittext", undefined);
+oddLeftPadding.minimumSize = [40, 0];
+
+var alternateOddRightWrapper = alternateOddContainer.add("group", undefined);
+
+alternateOddRightWrapper.add("statictext", undefined, "Right");
+var oddRightPadding = alternateOddRightWrapper.add("edittext", undefined);
+oddRightPadding.minimumSize = [40, 0];
+
+var alternateEvenContainer = methodOptionsContainer.add("panel", undefined, "Even");
 alternateEvenContainer.orientation = "row";
-alternateEvenContainer.add("statictext", undefined, "Left");
-var evenLeftPadding = alternateEvenContainer.add("edittext", undefined);
-evenLeftPadding.minimumSize = [32, 0];
-alternateEvenContainer.add("statictext", undefined, "Right");
-var evenRightPadding = alternateEvenContainer.add("edittext", undefined);
-evenRightPadding.minimumSize = [32, 0];
+alternateEvenContainer.paddings = configData.medic;
+alternateEvenContainer.alignment = configData.fillAlignment;
+alternateEvenContainer.alignChildren = configData.fillAlignment;
 
-// alternateOptionsContainer visibility toggling
+var alternateEvenLeftWrapper = alternateEvenContainer.add("group", undefined);
+
+alternateEvenLeftWrapper.add("statictext", undefined, "Left");
+var evenLeftPadding = alternateEvenLeftWrapper.add("edittext", undefined);
+evenLeftPadding.minimumSize = [40, 0];
+
+var alternateEvenRightWrapper = alternateEvenContainer.add("group", undefined);
+
+alternateEvenRightWrapper.add("statictext", undefined, "Right");
+var evenRightPadding = alternateEvenRightWrapper.add("edittext", undefined);
+evenRightPadding.minimumSize = [40, 0];
+
+// [alternateOptionsContainer] visibility toggling
 similarOption.onClick = function() {
-    alternateOptionsContainer.enabled = false;
+    alternateEvenContainer.enabled = false;
+    alternateOddContainer.enabled = false;
 };
 
 alternateOption.onClick = function() {
-    alternateOptionsContainer.enabled = true;
+    alternateEvenContainer.enabled = true;
+    alternateOddContainer.enabled = true;
 };
-
-// padding input
-var paddingContainer = dlg.add("group", undefined);
-paddingContainer.alignment = ["left", "center"];
-
-paddingContainer.add("statictext", undefined, "Padding ");
-var paddingAll = paddingContainer.add("edittext", undefined, "32");
-paddingAll.minimumSize = [64, 0];
-var unitOptions = paddingContainer.add("dropdownlist", undefined, ["pixels", "inches"]);
-
-var directionalPadding = dlg.add("checkbox", undefined, "Different Paddings");
-directionalPadding.alignment = ["left", "center"];
-
-var directionalPaddingContainer = dlg.add("group", undefined);
-directionalPaddingContainer.orientation = "column";
-
-var uppperPaddingContainer = directionalPaddingContainer.add("group", undefined);
-uppperPaddingContainer.orientation = "row";
-
-uppperPaddingContainer.add("statictext", undefined, "Top ");
-var topPadding = uppperPaddingContainer.add("edittext", undefined, "0");
-topPadding.minimumSize = [32, 0];
-
-uppperPaddingContainer.add("statictext", undefined, "Right ");
-var rightPadding = uppperPaddingContainer.add("edittext", undefined, "0");
-rightPadding.minimumSize = [32, 0];
-
-var lowerPaddingContainer = directionalPaddingContainer.add("group", undefined);
-lowerPaddingContainer.orientation = "row";
-
-lowerPaddingContainer.add("statictext", undefined, "Left ");
-var leftPadding = lowerPaddingContainer.add("edittext", undefined, "0");
-leftPadding.minimumSize = [32, 0];
-
-lowerPaddingContainer.add("statictext", undefined, "Bottom ");
-var bottomPadding = lowerPaddingContainer.add("edittext", undefined, "0");
-bottomPadding.minimumSize = [32, 0];
-
-function toggleAllPaddingState() {
-    if (directionalPadding.value) {
-        topPadding.enabled = true;
-        leftPadding.enabled = true;
-        rightPadding.enabled = true;
-        bottomPadding.enabled = true;
-
-        paddingAll.enabled = false;
-
-    } else {
-
-        topPadding.enabled = false;
-        leftPadding.enabled = false;
-        rightPadding.enabled = false;
-        bottomPadding.enabled = false;
-
-        paddingAll.enabled = true;
-
-    }
-}
-
-directionalPadding.onClick = toggleAllPaddingState;
 
 // * Main Scripting * //
 
@@ -297,11 +363,12 @@ function renderPadding() {
 }
 
 
+// add padding button
 var renderBtn = dlg.add("button", undefined, "Add Padding");
-renderBtn.alignment = ["right", "center"];
+renderBtn.minimumSize = [0, 40];
 renderBtn.onClick = renderPadding;
-renderBtn.helpTip = "To the active illustrator document";
-
+renderBtn.alignment = configData.fillAlignment;
+renderBtn.helpTip = "to the active illustrator document";
 
 // default options selections
 allArtboardOption.value = true;
@@ -310,6 +377,6 @@ similarOption.value = true;
 similarOption.onClick();
 unitOptions.selection = "pixels";
 directionalPadding.value = false;
-toggleAllPaddingState();
+allPaddingBtn.onClick();
 
 dlg.show();

@@ -8,8 +8,8 @@
 // 3. [Optional] By default, all the artboards will be affected.
 //    Alternatively, you can affect desired artboards by choosing
 //    the "Custom" option. Then input the custom number of artboards
-//    separated by a comma like '1, 3, 5' or a range of artboards
-//    like '1, 3, 5-8'.
+//    separated by a comma like "1, 3, 5" or a range of artboards
+//    like "1, 3, 5-8".
 // 4. [Optional] If you desire to add different margins for odd
 //    and even numbered artboards, then select the "Alternate"
 //    option. Then input the "Left" and "Right" margin for the
@@ -29,18 +29,32 @@
 // This script is distributed under the MIT License.
 // See the LICENSE file for details.
 
+//@target illustrator
+app.preferences.setBooleanPreference("ShowExternalJSXWarning", false);
+
+// config data
+var configData = {
+    margins: 15,
+    spacing: 10,
+    fillAlignment: ["fill", "center"],
+    leftAlignment: ["left", "center"],
+};
 
 // * UI * //
 // root window
 var dlg = new Window("dialog", "Add Margin");
+dlg.alignChildren = ["fill", "fill"];
 
 // artboard options layout
-var artboardOptionsContainer = dlg.add("group", undefined);
-artboardOptionsContainer.alignment = ["left", "center"];
+var artboardOptionsContainer = dlg.add("panel", undefined, "Artboards");
+artboardOptionsContainer.orientation = "row";
+artboardOptionsContainer.margins = configData.margins;
+artboardOptionsContainer.alignChildren = configData.fillAlignment;
 
-var allArtboardOption = artboardOptionsContainer.add("radiobutton", undefined, "All Artboards");
+var allArtboardOption = artboardOptionsContainer.add("radiobutton", undefined, "All");
 var customArtboardOption = artboardOptionsContainer.add("radiobutton", undefined, "Custom");
 var customArtboardInput = artboardOptionsContainer.add("edittext", undefined, "1, 3, 5-8");
+customArtboardInput.minimumSize = [100, 0];
 
 // disable/enable [customArtboardInput] text-field
 allArtboardOption.onClick = function () {
@@ -50,109 +64,162 @@ customArtboardOption.onClick = function () {
     customArtboardInput.enabled = true;
 };
 
-// method options layout
-var methodOptionsContainer = dlg.add("group", undefined);
-methodOptionsContainer.alignment = ["left", "center"];
+// margin input
+var marginContainer = dlg.add("panel", undefined, "Margin");
+marginContainer.margins = configData.margins;
+marginContainer.alignment = configData.fillAlignment;
+marginContainer.alignChildren = configData.leftAlignment;
 
-methodOptionsContainer.add("statictext", undefined, "Method ");
-var similarOption = methodOptionsContainer.add("radiobutton", undefined, "Similar");
-var alternateOption = methodOptionsContainer.add("radiobutton", undefined, "Alternate");
-alternateOption.helpTip = "Alternate between odd and even artboard number";
+var marginRadiobuttonGroup = marginContainer.add("group", undefined);
+marginRadiobuttonGroup.orientation = "column";
+marginRadiobuttonGroup.alignChildren = configData.leftAlignment;
+
+var allMarginWrapper = marginRadiobuttonGroup.add("group", undefined);
+
+var allMarginBtn = allMarginWrapper.add("radiobutton", undefined, "All");
+var marginAll = allMarginWrapper.add("edittext", undefined);
+marginAll.minimumSize = [60, 0];
+var unitOptions = allMarginWrapper.add("dropdownlist", undefined, ["pixels", "inches"]);
+
+var directionalMargin = marginRadiobuttonGroup.add("radiobutton", undefined, "Directional");
+
+// toggle radiobutton states
+allMarginBtn.onClick = function() {
+    // radiobuttons
+    this.value = true;
+    directionalMargin.value = false;
+
+    // edittexts
+    topMargin.enabled = false;
+    leftMargin.enabled = false;
+    rightMargin.enabled = false;
+    bottomMargin.enabled = false;
+
+    marginAll.enabled = true;
+
+}
+directionalMargin.onClick = function() {
+    // radiobuttons
+    this.value = true;
+    allMarginBtn.value = false;
+
+    // edittexts
+    topMargin.enabled = true;
+    leftMargin.enabled = true;
+    rightMargin.enabled = true;
+    bottomMargin.enabled = true;
+
+    marginAll.enabled = false;
+}
+
+// directional margin
+var directionalMarginPanel = marginContainer.add("group", undefined);
+directionalMarginPanel.orientation = "row";
+directionalMarginPanel.alignment = configData.leftAlignment;
+
+// var directionalMargin = dlg.add("checkbox", undefined, "Different margins");
+// directionalMargin.alignment = configData.leftAlignment;;
+
+var topWrapper = directionalMarginPanel.add("group", undefined);
+topWrapper.orientation = "column";
+topWrapper.alignChildren = configData.leftAlignment;;
+
+topWrapper.add("statictext", undefined, "Top ");
+var topMargin = topWrapper.add("edittext", undefined, "0");
+topMargin.minimumSize = [50, 0];
+
+var rightWrapper = directionalMarginPanel.add("group", undefined);
+rightWrapper.orientation = "column";
+rightWrapper.alignChildren = configData.leftAlignment;;
+
+rightWrapper.add("statictext", undefined, "Right ");
+var rightMargin = rightWrapper.add("edittext", undefined, "0");
+rightMargin.minimumSize = [50, 0];
+
+var leftWrapper = directionalMarginPanel.add("group", undefined);
+leftWrapper.orientation = "column";
+leftWrapper.alignChildren = configData.leftAlignment;;
+
+leftWrapper.add("statictext", undefined, "Left ");
+var leftMargin = leftWrapper.add("edittext", undefined, "0");
+leftMargin.minimumSize = [50, 0];
+
+var bottomWrapper = directionalMarginPanel.add("group", undefined);
+bottomWrapper.orientation = "column";
+bottomWrapper.alignChildren = configData.leftAlignment;;
+
+bottomWrapper.add("statictext", undefined, "Bottom ");
+var bottomMargin = bottomWrapper.add("edittext", undefined, "0");
+bottomMargin.minimumSize = [50, 0];
+
+// method options layout
+var methodOptionsContainer = dlg.add("panel", undefined, "Method");
+methodOptionsContainer.margins = configData.margins;
+methodOptionsContainer.alignChildren = configData.leftAlignment;
+
+var methodOptionsWrapper = methodOptionsContainer.add("group", undefined);
+methodOptionsWrapper.orientation = "row";
+
+var similarOption = methodOptionsWrapper.add("radiobutton", undefined, "Similar");
+similarOption.helpTip = "Same margin on all artboards";
+
+var alternateOption = methodOptionsWrapper.add("radiobutton", undefined, "Alternate");
+alternateOption.helpTip = "Alternate between odd and even numbered artboards";
 
 // alternate options input layout
-var alternateOptionsContainer = dlg.add("group", undefined);
-alternateOptionsContainer.orientation = "column";
-
-var alternateOddContainer = alternateOptionsContainer.add("panel", undefined, "Odd");
+var alternateOddContainer = methodOptionsContainer.add("panel", undefined, "Odd");
 alternateOddContainer.orientation = "row";
-alternateOddContainer.add("statictext", undefined, "Left");
-var oddLeftMargin = alternateOddContainer.add("edittext", undefined);
-oddLeftMargin.minimumSize = [32, 0];
-alternateOddContainer.add("statictext", undefined, "Right");
-var oddRightMargin = alternateOddContainer.add("edittext", undefined);
-oddRightMargin.minimumSize = [32, 0];
+alternateOddContainer.margins = configData.margins;
+alternateOddContainer.alignment = configData.fillAlignment;
+alternateOddContainer.alignChildren = configData.fillAlignment;
 
-var alternateEvenContainer = alternateOptionsContainer.add("panel", undefined, "Even");
+var alternateOddLeftWrapper = alternateOddContainer.add("group", undefined);
+
+alternateOddLeftWrapper.add("statictext", undefined, "Left");
+var oddLeftMargin = alternateOddLeftWrapper.add("edittext", undefined);
+oddLeftMargin.minimumSize = [40, 0];
+
+var alternateOddRightWrapper = alternateOddContainer.add("group", undefined);
+
+alternateOddRightWrapper.add("statictext", undefined, "Right");
+var oddRightMargin = alternateOddRightWrapper.add("edittext", undefined);
+oddRightMargin.minimumSize = [40, 0];
+
+var alternateEvenContainer = methodOptionsContainer.add("panel", undefined, "Even");
 alternateEvenContainer.orientation = "row";
-alternateEvenContainer.add("statictext", undefined, "Left");
-var evenLeftMargin = alternateEvenContainer.add("edittext", undefined);
-evenLeftMargin.minimumSize = [32, 0];
-alternateEvenContainer.add("statictext", undefined, "Right");
-var evenRightMargin = alternateEvenContainer.add("edittext", undefined);
-evenRightMargin.minimumSize = [32, 0];
+alternateEvenContainer.margins = configData.margins;
+alternateEvenContainer.alignment = configData.fillAlignment;
+alternateEvenContainer.alignChildren = configData.fillAlignment;
+
+var alternateEvenLeftWrapper = alternateEvenContainer.add("group", undefined);
+
+alternateEvenLeftWrapper.add("statictext", undefined, "Left");
+var evenLeftMargin = alternateEvenLeftWrapper.add("edittext", undefined);
+evenLeftMargin.minimumSize = [40, 0];
+
+var alternateEvenRightWrapper = alternateEvenContainer.add("group", undefined);
+
+alternateEvenRightWrapper.add("statictext", undefined, "Right");
+var evenRightMargin = alternateEvenRightWrapper.add("edittext", undefined);
+evenRightMargin.minimumSize = [40, 0];
 
 // [alternateOptionsContainer] visibility toggling
 similarOption.onClick = function() {
-    alternateOptionsContainer.enabled = false;
+    alternateEvenContainer.enabled = false;
+    alternateOddContainer.enabled = false;
 };
 
 alternateOption.onClick = function() {
-    alternateOptionsContainer.enabled = true;
+    alternateEvenContainer.enabled = true;
+    alternateOddContainer.enabled = true;
 };
 
-// margin input
-var marginContainer = dlg.add("group", undefined);
-marginContainer.alignment = ["left", "center"];
-
-marginContainer.add("statictext", undefined, "Margin ");
-var marginAll = marginContainer.add("edittext", undefined, "32");
-marginAll.minimumSize = [64, 0];
-var unitOptions = marginContainer.add("dropdownlist", undefined, ["pixels", "inches"]);
-
-var directionalMargin = dlg.add("checkbox", undefined, "Different margins");
-directionalMargin.alignment = ["left", "center"];
-
-var directionalMarginContainer = dlg.add("group", undefined);
-directionalMarginContainer.orientation = "column";
-
-var uppperMarginContainer = directionalMarginContainer.add("group", undefined);
-uppperMarginContainer.orientation = "row";
-
-uppperMarginContainer.add("statictext", undefined, "Top ");
-var topMargin = uppperMarginContainer.add("edittext", undefined, "0");
-topMargin.minimumSize = [32, 0];
-
-uppperMarginContainer.add("statictext", undefined, "Right ");
-var rightMargin = uppperMarginContainer.add("edittext", undefined, "0");
-rightMargin.minimumSize = [32, 0];
-
-var lowerMarginContainer = directionalMarginContainer.add("group", undefined);
-lowerMarginContainer.orientation = "row";
-
-lowerMarginContainer.add("statictext", undefined, "Left ");
-var leftMargin = lowerMarginContainer.add("edittext", undefined, "0");
-leftMargin.minimumSize = [32, 0];
-
-lowerMarginContainer.add("statictext", undefined, "Bottom ");
-var bottomMargin = lowerMarginContainer.add("edittext", undefined, "0");
-bottomMargin.minimumSize = [32, 0];
-
-function toggleAllMarginState() {
-    // disable/enable allmargin text-fields
-    if (directionalMargin.value) {
-        topMargin.enabled = true;
-        leftMargin.enabled = true;
-        rightMargin.enabled = true;
-        bottomMargin.enabled = true;
-
-        marginAll.enabled = false;
-
-    } else {
-        topMargin.enabled = false;
-        leftMargin.enabled = false;
-        rightMargin.enabled = false;
-        bottomMargin.enabled = false;
-
-        marginAll.enabled = true;
-    }
-}
-
-directionalMargin.onClick = toggleAllMarginState;
-
 // margin type layout
-var typeContainer = dlg.add("group", undefined);
-typeContainer.alignment = ["left",  "center"];
-typeContainer.add("statictext", undefined, "margin as ");
+var typeContainer = dlg.add("panel", undefined, "Margin as");
+typeContainer.orientation = "row";
+typeContainer.margins = configData.margins;
+typeContainer.alignChildren = configData.leftAlignment;
+// typeContainer.add("statictext", undefined, "margin as ");
 
 var asRect = typeContainer.add("radiobutton", undefined, "Rectangle");
 var asGuide = typeContainer.add("radiobutton", undefined, "Guide");
@@ -172,7 +239,7 @@ function parseInputRange(query) {
     // takes string like "0, 2, 4 - 6" as query
     // and returns Array like [ 0, 2, 4, 5, 6 ]
 
-    var lst = query.split(',');
+    var lst = query.split(",");
     var newLst = [];
     
     for(var i = 0; i < lst.length; i++) {
@@ -180,10 +247,10 @@ function parseInputRange(query) {
         // remove spaces
         var val = lst[i].replace(" ", "");
         
-        // if it's nested range parse it
+        // if it"s nested range parse it
         if(val.indexOf("-") !== -1) { 
             
-            var _lst = val.split('-');
+            var _lst = val.split("-");
 
             var start = parseInt(_lst[0]);
             var end = parseInt(_lst[1]);
@@ -319,7 +386,7 @@ function renderMargin() {
             artboardAddMargin(allArtboards, idx, marginLayer);
             
         }
-        // custom artboards ... roundabout way as Array.indexOf() doesn't work
+        // custom artboards ... roundabout way as Array.indexOf() doesn"t work
         else if (customArtboardLst.toString().indexOf( idx.toString() ) !== -1) {
             
             artboardAddMargin(allArtboards, idx, marginLayer);
@@ -333,10 +400,10 @@ function renderMargin() {
 
 // add margin button
 var renderBtn = dlg.add("button", undefined, "Add Margin");
-renderBtn.alignment = ["right", "center"];
+renderBtn.minimumSize = [0, 40];
 renderBtn.onClick = renderMargin;
-renderBtn.helpTip = "To the active illustrator document";
-
+renderBtn.alignment = configData.fillAlignment;
+renderBtn.helpTip = "to the active illustrator document";
 
 // default options selections
 allArtboardOption.value = true;
@@ -345,7 +412,7 @@ similarOption.value = true;
 similarOption.onClick();
 unitOptions.selection = "pixels";
 directionalMargin.value = false;
-toggleAllMarginState();
+allMarginBtn.onClick();
 asGuide.value = true;
 
 dlg.show();
